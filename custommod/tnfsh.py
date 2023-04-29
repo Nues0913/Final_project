@@ -7,16 +7,18 @@ async def studentnews():
 	href = []
 	tem_result = []
 	tem_href = []
+	# 多頁爬蟲，配合前端所需的回傳值進行list處理
 	for page in range(5):
 		url = "https://www.tnfsh.tn.edu.tw/latestevent/Index.aspx?Parser=9,3,19,,,,,,,," + str(page)
 		async with aiohttp.ClientSession(headers={"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:72.0) Gecko/20100101 Firefox/72.0"}) as session:
 			async with await session.get(url) as resp:
+				# http不正常時直接拋出AssertionError
 				assert resp.status == 200
+				# 使用異步aiohttp需要對resp做read()才能分析html
 				data = await resp.read()
 				web = bs4.BeautifulSoup(data, "html.parser")
 				root1 = web.find('ul', {'class': 'list list_type'})
 				root2 = root1.find_all('a', href=True, title=True)
-				#五個為一組進行分配，自動檢測不足跳出
 				for i in root2:
 					tem_result.append(i.text)
 					tem_href.append(i['href'])
